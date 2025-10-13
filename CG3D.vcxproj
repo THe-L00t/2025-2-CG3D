@@ -138,6 +138,7 @@
     <None Include="CG1-15.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cheat.h" />
     <ClInclude Include="loadShader.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
