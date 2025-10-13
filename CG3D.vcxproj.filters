@@ -13,10 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\shader">
+      <UniqueIdentifier>{3147f700-351f-4b1c-bf9a-3bd5d7995e9e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CG1-15.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CG1-15.vs">
+      <Filter>소스 파일\shader</Filter>
+    </None>
+    <None Include="CG1-15.fs">
+      <Filter>소스 파일\shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
