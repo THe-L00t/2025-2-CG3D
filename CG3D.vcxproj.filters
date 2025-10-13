@@ -30,4 +30,9 @@
       <Filter>소스 파일\shader</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="loadShader.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
