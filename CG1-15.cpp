@@ -55,7 +55,7 @@ void main(int argc, char** argv)
 	else {
 		std::cout << "GLEW Initialized\n";
 	}
-	bs = CompileShaders("shader1-12.vs", "shader1-8.fs");
+	bs = CompileShaders("CG1-15.vs", "CG1-15.fs");
 
 	glutDisplayFunc(drawScene); 
 	glutReshapeFunc(Reshape); 
