@@ -270,6 +270,8 @@ void drawAxis()
 	int worldTLoc = glGetUniformLocation(shader, "worldT");
 	int viewTLoc = glGetUniformLocation(shader, "viewT");
 	int projectTLoc = glGetUniformLocation(shader, "projectionT");
-	glUniformMatrix4fv(worldTLoc,1,GL_FALSE,)
+	glUniformMatrix4fv(worldTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::worldTransMatrix));
+	glUniformMatrix4fv(viewTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::viewTransMatrix));
+	glUniformMatrix4fv(projectTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::projectTransMatrix));
 	
 }
