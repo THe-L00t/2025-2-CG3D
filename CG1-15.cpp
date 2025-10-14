@@ -7,6 +7,69 @@ namespace beginConfig {
 	Color bg{ 1,1,1,1 };
 }
 
+namespace matConfig {
+	glm::mat4 worldTransMatrix(1.0f);
+	glm::mat4 viewTransMatrix(1.0f);
+	glm::mat4 projectTransMatrix(1.0f);
+}
+
+std::array<std::array<float, 18>, 6> cube = { {
+		// 면 1: 앞면 (z = 0.5)
+	   {-0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f},
+
+		// 면 2: 뒷면 (z = -0.5)
+		{-0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,
+		 -0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f},
+
+		 // 면 3: 왼쪽면 (x = -0.5)
+		 {-0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
+		  -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f},
+
+		  // 면 4: 오른쪽면 (x = 0.5)
+		 { 0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,
+		 0.5f, -0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,  0.5f},
+
+		 // 면 5: 윗면 (y = 0.5)
+	 {-0.5f,  0.5f, -0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+	  -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f},
+
+	  // 면 6: 아랫면 (y = -0.5)
+ {-0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,
+  -0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f}
+} };
+
+std::array<std::array<float, 18>, 5> pyramid = { {
+		// 면 1: 바닥면 (y = -0.5, 사각형 = 삼각형 2개)
+		{-0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,
+		 -0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f},
+
+		 // 면 2: 앞면 삼각형 (z = 0.5 쪽)
+		 {-0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.0f,  0.5f,  0.0f,
+		  -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.0f,  0.5f,  0.0f},
+
+		  // 면 3: 오른쪽면 삼각형 (x = 0.5 쪽)
+		  { 0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.0f,  0.5f,  0.0f,
+			0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.0f,  0.5f,  0.0f},
+
+			// 면 4: 뒷면 삼각형 (z = -0.5 쪽)
+			{ 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.0f,  0.5f,  0.0f,
+			  0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.0f,  0.5f,  0.0f},
+
+			  // 면 5: 왼쪽면 삼각형 (x = -0.5 쪽)
+			  {-0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,  0.0f,  0.5f,  0.0f,
+			   -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f,  0.0f,  0.5f,  0.0f}
+} };
+
+std::array<std::array<float, 4>, 6> col = { {
+	{1,0,0,1},	// R
+	{0,1,0,1},	// G
+	{0,0,1,1},	// B
+	{1,1,0,1},	// Y
+	{1,0,1,1},	// M
+	{0,1,1,1}	// c
+} };
+
 GameTimer* GameTimer::Instance;
 
 // basic callback
@@ -20,11 +83,12 @@ GLvoid loop(int);
 // Shader 
 GLuint bs{};
 GLuint VBO{};
-std::vector<float> Vertex{};
+std::vector<float> Vertex{};	// 점 float 3, 색 float 4
 
 // custom function
 // - Axis
 GLuint axisVBO{};
+void createAxis();
 void drawAxis();
 
 GameTimer gt;
@@ -180,6 +244,32 @@ GLvoid loop(int v)
 	glutTimerFunc(1, loop, 1);
 }
 
+void createAxis()
+{
+	static std::array<float, 42> axisVertexs = {
+		-1,0,0,		1,0,0,1,
+		1,0,0,		1,0,0,1,
+		0,-1,0,		0,1,0,1,
+		0,1,0,		0,1,0,1,
+		0,0,-1,		0,0,1,1,
+		0,0,1,		0,0,1,1
+	};
+
+	glGenBuffers(1, &axisVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glBufferData(GL_ARRAY_BUFFER, axisVertexs.size(), axisVertexs.data(), GL_STATIC_DRAW);
+
+
+}
+
 void drawAxis()
 {
+	GLuint shader = bs;
+	glUseProgram(shader);
+
+	int worldTLoc = glGetUniformLocation(shader, "worldT");
+	int viewTLoc = glGetUniformLocation(shader, "viewT");
+	int projectTLoc = glGetUniformLocation(shader, "projectionT");
+	glUniformMatrix4fv(worldTLoc,1,GL_FALSE,)
+	
 }
