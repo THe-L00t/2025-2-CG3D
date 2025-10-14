@@ -9,7 +9,6 @@ namespace beginConfig {
 
 GameTimer* GameTimer::Instance;
 
-// basic callback
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
@@ -17,15 +16,15 @@ GLvoid RanColor(Color&);
 GLvoid Mouse(int, int, int, int);
 GLvoid loop(int);
 
+
+GLuint CompileShaders(const std::string_view&, const std::string_view&);
+bool ReadFile(const std::string_view&, std::string*);
+void AddShader(GLuint, const std::string_view&, GLenum);
+
 // Shader 
 GLuint bs{};
 GLuint VBO{};
 std::vector<float> Vertex{};
-
-// custom function
-// - Axis
-GLuint axisVBO{};
-void drawAxis();
 
 GameTimer gt;
 
@@ -66,7 +65,7 @@ GLvoid drawScene()
 {
 
 	glClearColor(bg.r, bg.g, bg.b, bg.al);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	// 셰이더 사용하여 그리기
 	GLuint shader = bs;
@@ -178,8 +177,4 @@ GLvoid loop(int v)
 
 	glutPostRedisplay();
 	glutTimerFunc(1, loop, 1);
-}
-
-void drawAxis()
-{
 }
