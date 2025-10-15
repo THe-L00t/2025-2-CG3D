@@ -14,6 +14,7 @@
 #include <vector>
 #include <chrono>
 #include <string>
+#include <algorithm>
 
 #ifndef CHEAT
 #define CHEAT

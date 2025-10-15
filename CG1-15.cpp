@@ -75,6 +75,9 @@ std::array<std::array<float, 4>, 6> col = { {
 	{0,1,1,1}	// c
 } };
 
+std::array<int, 6> ranTwo = { 1,2,3,4,5,0 };
+std::array<int, 4> ranOne = { 1,2,3,4 };
+
 GameTimer* GameTimer::Instance;
 
 // basic callback
@@ -278,22 +281,114 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		}
 		break;
 	case '7':	// 앞
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(pyramid[1][3 * i]);
+			Vertex.push_back(pyramid[1][3 * i + 1]);
+			Vertex.push_back(pyramid[1][3 * i + 2]);
 
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
 		break;
 	case '8':	// 뒤
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(pyramid[2][3 * i]);
+			Vertex.push_back(pyramid[2][3 * i + 1]);
+			Vertex.push_back(pyramid[2][3 * i + 2]);
 
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
 		break;
 	case '9':	// 왼
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(pyramid[3][3 * i]);
+			Vertex.push_back(pyramid[3][3 * i + 1]);
+			Vertex.push_back(pyramid[3][3 * i + 2]);
 
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
 		break;
 	case '0':	// 오
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(pyramid[4][3 * i]);
+			Vertex.push_back(pyramid[4][3 * i + 1]);
+			Vertex.push_back(pyramid[4][3 * i + 2]);
 
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
 		break;
 	case 'c':
+		std::shuffle(ranTwo.begin(), ranTwo.end(), dre);
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[ranTwo[0]][3 * i]);
+			Vertex.push_back(cube[ranTwo[0]][3 * i + 1]);
+			Vertex.push_back(cube[ranTwo[0]][3 * i + 2]);
 
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
+		ci = colorUid(dre);
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[ranTwo[1]][3 * i]);
+			Vertex.push_back(cube[ranTwo[1]][3 * i + 1]);
+			Vertex.push_back(cube[ranTwo[1]][3 * i + 2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
 		break;
 	case 't':
+		std::shuffle(ranOne.begin(), ranOne.end(), dre);
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(pyramid[0][3 * i]);
+			Vertex.push_back(pyramid[0][3 * i + 1]);
+			Vertex.push_back(pyramid[0][3 * i + 2]);
 
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
+		ci = colorUid(dre);
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(pyramid[ranOne[0]][3 * i]);
+			Vertex.push_back(pyramid[ranOne[0]][3 * i + 1]);
+			Vertex.push_back(pyramid[ranOne[0]][3 * i + 2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
 		break;
 	case 'q':
 		glutLeaveMainLoop();
@@ -302,7 +397,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	if (Vertex.size() not_eq 0) {
 		glGenBuffers(1, &VBO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, Vertex.size(), Vertex.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, Vertex.size()*sizeof(float), Vertex.data(), GL_STATIC_DRAW);
 	}
 	glutPostRedisplay();
 }
