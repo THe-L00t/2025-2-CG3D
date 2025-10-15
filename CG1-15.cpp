@@ -116,7 +116,15 @@ void main(int argc, char** argv)
 	else {
 		std::cout << "GLEW Initialized\n";
 	}
+
+
+	matConfig::worldTransMatrix = glm::rotate(matConfig::worldTransMatrix, glm::radians(30.f), glm::vec3(1., 0., 0.));
+	matConfig::worldTransMatrix = glm::rotate(matConfig::worldTransMatrix, glm::radians(-30.f), glm::vec3(0., 1., 0.));
 	bs = CompileShaders("CG1-15.vs", "CG1-15.fs");
+
+
+
+
 
 	glutDisplayFunc(drawScene); 
 	glutReshapeFunc(Reshape); 
@@ -133,6 +141,8 @@ GLvoid drawScene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// 셰이더 사용하여 그리기
+	drawAxis();
+
 	GLuint shader = bs;
 	glUseProgram(shader);
 
@@ -274,4 +284,20 @@ void drawAxis()
 	glUniformMatrix4fv(viewTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::viewTransMatrix));
 	glUniformMatrix4fv(projectTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::projectTransMatrix));
 	
+	int aPosition = glGetAttribLocation(shader, "a_Position");
+	int aColor = glGetAttribLocation(shader, "a_Color");
+
+	glEnableVertexAttribArray(aPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+
+	glEnableVertexAttribArray(aColor);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glVertexAttribPointer(aColor, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_LINE, 0, 6);
+
+	glDisableVertexAttribArray(aPosition);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
