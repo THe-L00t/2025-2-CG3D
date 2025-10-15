@@ -1,6 +1,11 @@
 ﻿#include "loadShader.hpp"
 #include "cheat.h"
 
+std::random_device rd{};
+std::default_random_engine dre{ rd() };
+std::uniform_int_distribution colorUid(0, 5);
+
+
 namespace beginConfig {
 	int width{ 800 };
 	int height{ 800 };
@@ -102,7 +107,7 @@ void main(int argc, char** argv)
 {
 
 	glutInit(&argc, argv); 
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA); 
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH); 
 	glutInitWindowPosition(0, 0); 
 	glutInitWindowSize(beginConfig::width, beginConfig::height); 
 	glutCreateWindow("Example1"); 
@@ -117,14 +122,18 @@ void main(int argc, char** argv)
 		std::cout << "GLEW Initialized\n";
 	}
 
+	createAxis();
 
 	matConfig::worldTransMatrix = glm::rotate(matConfig::worldTransMatrix, glm::radians(30.f), glm::vec3(1., 0., 0.));
 	matConfig::worldTransMatrix = glm::rotate(matConfig::worldTransMatrix, glm::radians(-30.f), glm::vec3(0., 1., 0.));
+	//matConfig::viewTransMatrix = glm::translate(matConfig::viewTransMatrix, glm::vec3(0.0f, 0.0f, -2.0f));
+	//matConfig::projectTransMatrix = glm::perspective(glm::radians(60.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	matConfig::projectTransMatrix = glm::ortho(-1.f,1.f,-1.f,1.f,-1.f,1.f);
 	bs = CompileShaders("CG1-15.vs", "CG1-15.fs");
 
 
 
-
+	glEnable(GL_DEPTH_TEST);
 
 	glutDisplayFunc(drawScene); 
 	glutReshapeFunc(Reshape); 
@@ -146,6 +155,27 @@ GLvoid drawScene()
 	GLuint shader = bs;
 	glUseProgram(shader);
 
+	int worldTLoc = glGetUniformLocation(shader, "worldT");
+	int viewTLoc = glGetUniformLocation(shader, "viewT");
+	int projectTLoc = glGetUniformLocation(shader, "projectionT");
+	glUniformMatrix4fv(worldTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::worldTransMatrix));
+	glUniformMatrix4fv(viewTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::viewTransMatrix));
+	glUniformMatrix4fv(projectTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::projectTransMatrix));
+
+	int aPosition = glGetAttribLocation(shader, "a_Pos");
+	int aColor = glGetAttribLocation(shader, "a_Color");
+
+	glEnableVertexAttribArray(aPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, 0);
+
+	glEnableVertexAttribArray(aColor);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_TRIANGLES, 0, Vertex.size()/7);
+
+	glDisableVertexAttribArray(aPosition);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -160,36 +190,103 @@ GLvoid Reshape(int w, int h)
 
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
-
+	int ci = colorUid(dre);
 	switch (key) {
-	case '1':
+	case '1':	// 앞
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[0][3 * i]);
+			Vertex.push_back(cube[0][3 * i+1]);
+			Vertex.push_back(cube[0][3 * i+2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
+		break;
+	case '2':	// 뒤 
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[1][3 * i]);
+			Vertex.push_back(cube[1][3 * i + 1]);
+			Vertex.push_back(cube[1][3 * i + 2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
 
 		break;
-	case '2':
+	case '3':	// 왼
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[2][3 * i]);
+			Vertex.push_back(cube[2][3 * i + 1]);
+			Vertex.push_back(cube[2][3 * i + 2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
+		break;
+	case '4':	// 오
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[3][3 * i]);
+			Vertex.push_back(cube[3][3 * i + 1]);
+			Vertex.push_back(cube[3][3 * i + 2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
+		break;	
+	case '5':	// 위
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[4][3 * i]);
+			Vertex.push_back(cube[4][3 * i + 1]);
+			Vertex.push_back(cube[4][3 * i + 2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
+		break;
+	case '6':	//아래
+		Vertex.clear();
+		for (size_t i = 0; i < 6; i++)
+		{
+			Vertex.push_back(cube[5][3 * i]);
+			Vertex.push_back(cube[5][3 * i + 1]);
+			Vertex.push_back(cube[5][3 * i + 2]);
+
+			for (size_t j = 0; j < 4; j++)
+			{
+				Vertex.push_back(col[ci][j]);
+			}
+		}
+		break;
+	case '7':	// 앞
 
 		break;
-	case '3':
+	case '8':	// 뒤
 
 		break;
-	case '4':
+	case '9':	// 왼
 
 		break;
-	case '5':
-
-		break;
-	case '6':
-
-		break;
-	case '7':
-
-		break;
-	case '8':
-
-		break;
-	case '9':
-
-		break;
-	case '0':
+	case '0':	// 오
 
 		break;
 	case 'c':
@@ -202,16 +299,15 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		glutLeaveMainLoop();
 		break;
 	}
+	if (Vertex.size() not_eq 0) {
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, Vertex.size(), Vertex.data(), GL_STATIC_DRAW);
+	}
 	glutPostRedisplay();
 }
 
-//GLvoid RanColor(Color& c)
-//{
-//	float r = urgb(dre);
-//	float g = urgb(dre);
-//	float b = urgb(dre);
-//	c = { r / 255,g / 255,b / 255,1 };
-//}
+
 
 GLvoid Mouse(int button, int state, int x, int y)
 {
@@ -267,7 +363,7 @@ void createAxis()
 
 	glGenBuffers(1, &axisVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
-	glBufferData(GL_ARRAY_BUFFER, axisVertexs.size(), axisVertexs.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertexs), axisVertexs.data(), GL_STATIC_DRAW);
 
 
 }
@@ -284,18 +380,20 @@ void drawAxis()
 	glUniformMatrix4fv(viewTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::viewTransMatrix));
 	glUniformMatrix4fv(projectTLoc, 1, GL_FALSE, glm::value_ptr(matConfig::projectTransMatrix));
 	
-	int aPosition = glGetAttribLocation(shader, "a_Position");
+	int aPosition = glGetAttribLocation(shader, "a_Pos");
 	int aColor = glGetAttribLocation(shader, "a_Color");
 
 	glEnableVertexAttribArray(aPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
-	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, 0);
 
 	glEnableVertexAttribArray(aColor);
 	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
-	glVertexAttribPointer(aColor, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 3));
 
-	glDrawArrays(GL_LINE, 0, 6);
+	glLineWidth(2.0f);
+
+	glDrawArrays(GL_LINES, 0, 6);
 
 	glDisableVertexAttribArray(aPosition);
 

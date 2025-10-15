@@ -14,6 +14,6 @@ void main()
 {
 	vec4 newPosition = projectionT * viewT * worldT * vec4(a_Pos,1);
 
-	gl_position = newPosition;
+	gl_Position = newPosition;
 	v_Color = a_Color;
 }
