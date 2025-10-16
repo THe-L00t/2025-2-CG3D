@@ -1,6 +1,10 @@
 #include "loadShader.hpp"
 #include "cheat.h"
 
+std::random_device rd{};
+std::default_random_engine dre{ rd() };
+std::uniform_int_distribution colorUid(0, 5);
+
 namespace beginConfig {
 	int width{ 800 };
 	int height{ 800 };
@@ -27,6 +31,77 @@ GLuint VBO{};
 std::vector<float> Vertex{};
 
 GameTimer gt;
+int ci = colorUid(dre);
+
+class Object {
+public:
+	virtual void draw() = 0;
+	void init()
+	{
+		pos = { 0.f,0.f,0.f };
+		ang = { 0.f,0.f,0.f };
+	}
+	void move(const glm::vec3& dir) {
+		pos += dir;
+	}
+	void rotate(const glm::vec3& tor) {
+		ang += tor;
+	}
+protected:
+	glm::vec3 pos{};
+	glm::vec3 ang{};
+};
+
+class CubeO : public Object { 
+	CubeO()
+	{
+		for (size_t p = 0; p < 6; p++)
+		{
+			ci = colorUid(dre);
+			for (size_t i = 0; i < 6; i++)
+			{
+				Vertex.push_back(cube[p][3 * i]);
+				Vertex.push_back(cube[p][3 * i + 1]); 
+				Vertex.push_back(cube[p][3 * i + 2]);
+
+				for (size_t j = 0; j < 4; j++)
+				{
+					Vertex.push_back(col[ci][j]);
+				}
+			}
+		}
+		
+	}
+	virtual void draw() final
+	{
+
+	}
+};
+
+class PyramidO : public Object{
+	PyramidO()
+	{
+		for (size_t p = 0; p < 5; p++)
+		{
+			ci = colorUid(dre);
+			for (size_t i = 0; i < 6; i++)
+			{
+				Vertex.push_back(pyramid[p][3 * i]);
+				Vertex.push_back(pyramid[p][3 * i + 1]);
+				Vertex.push_back(pyramid[p][3 * i + 2]);
+
+				for (size_t j = 0; j < 4; j++)
+				{
+					Vertex.push_back(col[ci][j]);
+				}
+			}
+		}
+	}
+	virtual void draw() final
+	{
+
+	}
+};
 
 int num{};
 int method{};
