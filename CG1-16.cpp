@@ -91,6 +91,8 @@ class CubeO : public Object {
 
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(ang.x), glm::vec3(1., 0., 0.));
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(ang.y), glm::vec3(0., 1., 0.));
+		worldTransMatrix = glm::translate(worldTransMatrix, glm::vec3(pos.x, pos.y, pos.z));
+
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(30.f), glm::vec3(1., 0., 0.));
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(-30.f), glm::vec3(0., 1., 0.));
 		projectTransMatrix = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f);
@@ -161,10 +163,12 @@ class PyramidO : public Object{
 
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(ang.x), glm::vec3(1., 0., 0.));
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(ang.y), glm::vec3(0., 1., 0.));
+		worldTransMatrix = glm::translate(worldTransMatrix, glm::vec3(pos.x, pos.y, pos.z));
+
+
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(30.f), glm::vec3(1., 0., 0.));
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(-30.f), glm::vec3(0., 1., 0.));
 		projectTransMatrix = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f);
-
 
 
 		glUniformMatrix4fv(worldTLoc, 1, GL_FALSE, glm::value_ptr(worldTransMatrix));
