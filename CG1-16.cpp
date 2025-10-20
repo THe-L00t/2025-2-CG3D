@@ -1,3 +1,4 @@
+#include <memory>
 #include "loadShader.hpp"
 #include "cheat.h"
 
@@ -53,6 +54,7 @@ protected:
 };
 
 class CubeO : public Object { 
+public:
 	CubeO()
 	{
 		init();
@@ -125,6 +127,7 @@ class CubeO : public Object {
 };
 
 class PyramidO : public Object{
+public:
 	PyramidO()
 	{
 		init();
@@ -200,6 +203,7 @@ int num{};
 int method{};
 Color bg = beginConfig::bg;
 
+Object* curObj{};
 
 void main(int argc, char** argv)
 {
@@ -220,6 +224,7 @@ void main(int argc, char** argv)
 		std::cout << "GLEW Initialized\n";
 	}
 	bs = CompileShaders("CG1-15.vs", "CG1-15.fs");
+	curObj = new CubeO();
 
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(Reshape);
@@ -236,11 +241,7 @@ GLvoid drawScene()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// 셰이더 사용하여 그리기
-	GLuint shader = bs;
-	glUseProgram(shader);
-
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if(curObj) curObj->draw();
 
 	glutSwapBuffers();
 }
@@ -255,41 +256,43 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 {
 
 	switch (key) {
-	case '1':
-
-		break;
-	case '2':
-
-		break;
-	case '3':
-
-		break;
-	case '4':
-
-		break;
-	case '5':
-
-		break;
-	case '6':
-
-		break;
-	case '7':
-
-		break;
-	case '8':
-
-		break;
-	case '9':
-
-		break;
-	case '0':
-
-		break;
 	case 'c':
+		delete curObj;
+		curObj = new CubeO();
+		break;
+	case 'p':
+		delete curObj;
+		curObj = new PyramidO();
+		break;
+	case 'h':
 
 		break;
-	case 't':
+	case 'w': case 'W':
 
+		break;
+	case 'z':	//x축 음회전
+		curObj->rotate(glm::vec3(-10, 0, 0));
+		break;
+	case 'x':	//x축 양회전
+		curObj->rotate(glm::vec3(10, 0, 0));
+		break;
+	case 't':	//y축 음회전
+		curObj->rotate(glm::vec3(0, -10, 0));
+		break;
+	case 'y':	//y축 양회전
+		curObj->rotate(glm::vec3(0, 10, 0));
+		break;
+	case GLUT_KEY_LEFT:
+		curObj->move(glm::vec3(-0.05, 0, 0));
+		break;
+	case GLUT_KEY_RIGHT:
+		curObj->move(glm::vec3(0.05, 0, 0));
+		break;
+	case GLUT_KEY_UP:
+		curObj->move(glm::vec3(0, 0.05, 0));
+		break;
+	case GLUT_KEY_DOWN:
+		curObj->move(glm::vec3(5, -0.05, 0));
 		break;
 	case 'q':
 		glutLeaveMainLoop();
