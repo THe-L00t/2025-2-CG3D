@@ -145,7 +145,7 @@ public:
 		glDisableVertexAttribArray(aPosition);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		std::cout << Vertex.size() << std::endl;
 	}
 };
 
@@ -280,7 +280,7 @@ GLvoid Reshape(int w, int h)
 	glViewport(0, 0, w, h);
 }
 
-bool h{ true }, u{ true };
+bool h{ true }, u{ true }, p{ true };
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
 
@@ -290,27 +290,35 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		curObj = new CubeO();
 		break;
 	case 'p':
-		delete curObj;
-		curObj = new PyramidO();
+		if (p) {
+			p = false;
+			delete curObj;
+			curObj = new PyramidO();
+		}
+		else {
+			p = true;
+			delete curObj;
+			curObj = new CubeO();
+		}
 		break;
 	case 'h':
 		if (h) {
 			h = false;
-			glEnable(GL_CULL_FACE);
+			glEnable(GL_DEPTH_TEST);
 		}
 		else {
 			h = true;
-			glDisable(GL_CULL_FACE);
+			glDisable(GL_DEPTH_TEST);
 		}
 		break;
 	case 'u':
 		if (u) {
 			u = false;
-			glEnable(GL_DEPTH_TEST);
+			glEnable(GL_CULL_FACE);
 		}
 		else {
 			u = true;
-			glDisable(GL_DEPTH_TEST);
+			glDisable(GL_CULL_FACE);
 		}
 		break;
 	case 'w': case 'W':
