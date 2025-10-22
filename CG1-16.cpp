@@ -12,11 +12,18 @@ namespace beginConfig {
 	Color bg{ 1,1,1,1 };
 }
 
+namespace CameraConfig {
+	glm::vec3 pos{ 5.f,5.f,-2.f };
+	glm::vec3 dir{ 0,0,0 };
+	glm::vec3 up{ 0,1,0 };
+}
+
 GameTimer* GameTimer::Instance;
 
 GLvoid drawScene(GLvoid);
 GLvoid Reshape(int w, int h);
 GLvoid Keyboard(unsigned char key, int x, int y);
+GLvoid SKeyboard(int key, int x, int y);
 GLvoid RanColor(Color&);
 GLvoid Mouse(int, int, int, int);
 GLvoid loop(int);
@@ -31,8 +38,15 @@ GLuint bs{};
 GLuint VBO{};
 std::vector<float> Vertex{};
 
+
+GLuint axisVBO{};
+void createAxis();
+void drawAxis();
+
 GameTimer gt;
 int ci = colorUid(dre);
+
+bool w{ true };
 
 class Object {
 public:
@@ -77,6 +91,9 @@ public:
 				}
 			}
 		}
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, Vertex.size() * sizeof(float), Vertex.data(), GL_STATIC_DRAW);
 	}
 	virtual void draw() final
 	{
@@ -95,9 +112,8 @@ public:
 		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(ang.y), glm::vec3(0., 1., 0.));
 		worldTransMatrix = glm::translate(worldTransMatrix, glm::vec3(pos.x, pos.y, pos.z));
 
-		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(30.f), glm::vec3(1., 0., 0.));
-		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(-30.f), glm::vec3(0., 1., 0.));
-		projectTransMatrix = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f);
+		viewTransMatrix = glm::lookAt(CameraConfig::pos, CameraConfig::dir, CameraConfig::up);
+		projectTransMatrix = glm::perspective(glm::radians(45.f), 1.f, 1.f, 100.f);
 
 
 
@@ -116,13 +132,13 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 3));
 
-		glDrawArrays(GL_TRIANGLES, 0, Vertex.size() / 7);
+		if (w) glDrawArrays(GL_TRIANGLES, 0, Vertex.size() / 7);
+		else glDrawArrays(GL_LINE_LOOP, 0, Vertex.size() / 7);
 
 		glDisableVertexAttribArray(aPosition);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		glutSwapBuffers();
 	}
 };
 
@@ -150,6 +166,9 @@ public:
 				}
 			}
 		}
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, Vertex.size() * sizeof(float), Vertex.data(), GL_STATIC_DRAW);
 	}
 	virtual void draw() final
 	{
@@ -169,9 +188,8 @@ public:
 		worldTransMatrix = glm::translate(worldTransMatrix, glm::vec3(pos.x, pos.y, pos.z));
 
 
-		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(30.f), glm::vec3(1., 0., 0.));
-		worldTransMatrix = glm::rotate(worldTransMatrix, glm::radians(-30.f), glm::vec3(0., 1., 0.));
-		projectTransMatrix = glm::ortho(-1.f, 1.f, -1.f, 1.f, -1.f, 1.f);
+		viewTransMatrix = glm::lookAt(CameraConfig::pos, CameraConfig::dir, CameraConfig::up);
+		projectTransMatrix = glm::perspective(glm::radians(45.f),1.f,1.f,100.f);
 
 
 		glUniformMatrix4fv(worldTLoc, 1, GL_FALSE, glm::value_ptr(worldTransMatrix));
@@ -189,13 +207,13 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 3));
 
-		glDrawArrays(GL_TRIANGLES, 0, Vertex.size() / 7);
+		if(w) glDrawArrays(GL_TRIANGLES, 0, Vertex.size() / 7);
+		else glDrawArrays(GL_LINE_LOOP, 0, Vertex.size() / 7);
 
 		glDisableVertexAttribArray(aPosition);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		glutSwapBuffers();
 	}
 };
 
@@ -225,10 +243,13 @@ void main(int argc, char** argv)
 	}
 	bs = CompileShaders("CG1-15.vs", "CG1-15.fs");
 	curObj = new CubeO();
+	createAxis();
+	glEnable(GL_DEPTH_TEST);
 
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(Reshape);
 	glutKeyboardFunc(Keyboard);
+	glutSpecialFunc(SKeyboard);
 	glutMouseFunc(Mouse);
 	glutTimerFunc(1, loop, 1);
 	glutMainLoop();
@@ -238,10 +259,11 @@ GLvoid drawScene()
 {
 
 	glClearColor(bg.r, bg.g, bg.b, bg.al);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// 셰이더 사용하여 그리기
 	if(curObj) curObj->draw();
+	drawAxis();
 
 	glutSwapBuffers();
 }
@@ -251,7 +273,7 @@ GLvoid Reshape(int w, int h)
 	glViewport(0, 0, w, h);
 }
 
-
+bool h{ true }, u{ true };
 GLvoid Keyboard(unsigned char key, int x, int y)
 {
 
@@ -265,10 +287,28 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		curObj = new PyramidO();
 		break;
 	case 'h':
-
+		if (h) {
+			h = false;
+			glEnable(GL_CULL_FACE);
+		}
+		else {
+			h = true;
+			glDisable(GL_CULL_FACE);
+		}
+		break;
+	case 'u':
+		if (u) {
+			u = false;
+			glEnable(GL_DEPTH_TEST);
+		}
+		else {
+			u = true;
+			glDisable(GL_DEPTH_TEST);
+		}
 		break;
 	case 'w': case 'W':
-
+		if (w) w = false;
+		else w = true;
 		break;
 	case 'z':	//x축 음회전
 		curObj->rotate(glm::vec3(-10, 0, 0));
@@ -282,6 +322,16 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case 'y':	//y축 양회전
 		curObj->rotate(glm::vec3(0, 10, 0));
 		break;
+	
+	case 'q':
+		glutLeaveMainLoop();
+		break;
+	}
+	glutPostRedisplay();
+}
+
+GLvoid SKeyboard(int key, int x, int y) {
+	switch (key) {
 	case GLUT_KEY_LEFT:
 		curObj->move(glm::vec3(-0.05, 0, 0));
 		break;
@@ -292,13 +342,9 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		curObj->move(glm::vec3(0, 0.05, 0));
 		break;
 	case GLUT_KEY_DOWN:
-		curObj->move(glm::vec3(5, -0.05, 0));
-		break;
-	case 'q':
-		glutLeaveMainLoop();
+		curObj->move(glm::vec3(0, -0.05, 0));
 		break;
 	}
-	glutPostRedisplay();
 }
 
 
@@ -341,4 +387,61 @@ GLvoid loop(int v)
 
 	glutPostRedisplay();
 	glutTimerFunc(1, loop, 1);
+}
+
+void createAxis()
+{
+	static std::array<float, 42> axisVertexs = {
+		-1,0,0,		1,0,0,1,
+		1,0,0,		1,0,0,1,
+		0,-1,0,		0,1,0,1,
+		0,1,0,		0,1,0,1,
+		0,0,-1,		0,0,1,1,
+		0,0,1,		0,0,1,1
+	};
+
+	glGenBuffers(1, &axisVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertexs), axisVertexs.data(), GL_STATIC_DRAW);
+
+
+}
+
+void drawAxis()
+{
+	glm::mat4 worldTransMatrix(1.0f);
+	glm::mat4 viewTransMatrix(1.0f);
+	glm::mat4 projectTransMatrix(1.0f);
+
+	GLuint shader = bs;
+	glUseProgram(shader);
+
+	viewTransMatrix = glm::lookAt(CameraConfig::pos, CameraConfig::dir, CameraConfig::up);
+	projectTransMatrix = glm::perspective(glm::radians(45.f), 1.f, 1.f, 100.f);
+
+	int worldTLoc = glGetUniformLocation(shader, "worldT");
+	int viewTLoc = glGetUniformLocation(shader, "viewT");
+	int projectTLoc = glGetUniformLocation(shader, "projectionT");
+	glUniformMatrix4fv(worldTLoc, 1, GL_FALSE, glm::value_ptr(worldTransMatrix));
+	glUniformMatrix4fv(viewTLoc, 1, GL_FALSE, glm::value_ptr(viewTransMatrix));
+	glUniformMatrix4fv(projectTLoc, 1, GL_FALSE, glm::value_ptr(projectTransMatrix));
+
+	int aPosition = glGetAttribLocation(shader, "a_Pos");
+	int aColor = glGetAttribLocation(shader, "a_Color");
+
+	glEnableVertexAttribArray(aPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glVertexAttribPointer(aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, 0);
+
+	glEnableVertexAttribArray(aColor);
+	glBindBuffer(GL_ARRAY_BUFFER, axisVBO);
+	glVertexAttribPointer(aColor, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 3));
+
+	glLineWidth(2.0f);
+
+	glDrawArrays(GL_LINES, 0, 6);
+
+	glDisableVertexAttribArray(aPosition);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
