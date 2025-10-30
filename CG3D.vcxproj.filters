@@ -49,4 +49,9 @@
       <Filter>소스 파일</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <Object Include="cone.obj">
+      <Filter>리소스 파일</Filter>
+    </Object>
+  </ItemGroup>
 </Project>
