@@ -45,17 +45,17 @@ int method{};
 Color bg = beginConfig::bg;
 
 
-void main(int argc, char** argv) 
+void main(int argc, char** argv)
 {
 
-	glutInit(&argc, argv); 
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA); 
-	glutInitWindowPosition(0, 0); 
-	glutInitWindowSize(beginConfig::width, beginConfig::height); 
-	glutCreateWindow("Example1"); 
-	
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(beginConfig::width, beginConfig::height);
+	glutCreateWindow("Example1");
+
 	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) { 
+	if (glewInit() != GLEW_OK) {
 		std::cerr << "Unable to initialize GLEW" << std::endl
 			;
 		exit(EXIT_FAILURE);
@@ -65,12 +65,12 @@ void main(int argc, char** argv)
 	}
 	bs = CompileShaders("CG1-15.vs", "CG1-15.fs");
 
-	glutDisplayFunc(drawScene); 
-	glutReshapeFunc(Reshape); 
-	glutKeyboardFunc(Keyboard); 
+	glutDisplayFunc(drawScene);
+	glutReshapeFunc(Reshape);
+	glutKeyboardFunc(Keyboard);
 	glutMouseFunc(Mouse);
 	glutTimerFunc(1, loop, 1);
-	glutMainLoop(); 
+	glutMainLoop();
 }
 
 GLvoid drawScene()
@@ -185,7 +185,7 @@ GLvoid loop(int v)
 {
 	gt.Update();
 
-	
+
 
 	glutPostRedisplay();
 	glutTimerFunc(1, loop, 1);
