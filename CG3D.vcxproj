@@ -149,12 +149,10 @@
   <ItemGroup>
     <ClInclude Include="cheat.h" />
     <ClInclude Include="loadShader.hpp" />
+    <ClInclude Include="OBJLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="basicCode.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="cone.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
