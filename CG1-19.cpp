@@ -72,14 +72,26 @@ float cameraDistance = 3.0f;  // Distance from origin
 bool isPerspective = true;  // true: perspective, false: orthographic
 bool isSolid = true;  // true: solid, false: wireframe
 
+// All spheres transformation
+glm::vec3 allSpheresOffset(0.0f, 0.0f, 0.0f);  // Offset for all spheres
+float moveSpeed = 0.1f;  // Movement speed
+float radiusChangeSpeed = 0.1f;  // Orbit radius change speed
+
 // Orbit variables
 float orbitRadius = 1.5f;
+float initialOrbitRadius = 1.5f;  // Store initial radius for scaling
 float orbitSpeed = 0.01f;
 float orbitPlaneTilts[3] = { glm::radians(30.0f), glm::radians(0.0f), glm::radians(-30.0f) };
 float orbitRotation = 0.0f;
 
+// Z-axis rotation for all spheres
+float zAxisRotation = 0.0f;
+float zRotationSpeed = 0.01f;  // Rotation speed per frame
+bool isZRotating = false;  // Toggle for Z-axis rotation
+
 // Green sphere orbit variables
 float greenOrbitRadius = 0.5f;
+float initialGreenOrbitRadius = 0.5f;  // Store initial radius for scaling
 float greenOrbitSpeed = 0.02f;
 float greenOrbitRotation = 0.0f;
 
@@ -243,9 +255,10 @@ GLvoid drawScene()
 	GLuint shader = bs;
 	glUseProgram(shader);
 
-	// Set up transformation matrices
+	// Set up transformation matrices with offset and Z-axis rotation for all spheres
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Center position
+	model = glm::translate(model, allSpheresOffset); // Apply offset to center sphere
+	model = glm::rotate(model, zAxisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Apply Z-axis rotation
 
 	glm::mat4 view = glm::lookAt(
 		CameraConfig::pos,
@@ -304,8 +317,18 @@ GLvoid drawScene()
 	{
 		glm::mat4 orbitCircleModel = glm::mat4(1.0f);
 
+		// Apply offset
+		orbitCircleModel = glm::translate(orbitCircleModel, allSpheresOffset);
+
+		// Apply Z-axis rotation
+		orbitCircleModel = glm::rotate(orbitCircleModel, zAxisRotation, glm::vec3(0.0f, 0.0f, 1.0f));
+
 		// Rotate orbit plane around X-axis (tilt the plane)
 		orbitCircleModel = glm::rotate(orbitCircleModel, orbitPlaneTilts[i], glm::vec3(1.0f, 0.0f, 0.0f));
+
+		// Scale orbit circle based on current orbit radius
+		float scale = orbitRadius / initialOrbitRadius;
+		orbitCircleModel = glm::scale(orbitCircleModel, glm::vec3(scale, scale, scale));
 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(orbitCircleModel));
 		glDrawArrays(GL_LINE_LOOP, 0, circleVertexCount);
@@ -317,6 +340,12 @@ GLvoid drawScene()
 	for (int i = 0; i < 3; i++)
 	{
 		glm::mat4 orbitModel = glm::mat4(1.0f);
+
+		// Apply offset
+		orbitModel = glm::translate(orbitModel, allSpheresOffset);
+
+		// Apply Z-axis rotation
+		orbitModel = glm::rotate(orbitModel, zAxisRotation, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		// Rotate orbit plane around X-axis (tilt the plane)
 		orbitModel = glm::rotate(orbitModel, orbitPlaneTilts[i], glm::vec3(1.0f, 0.0f, 0.0f));
@@ -341,6 +370,12 @@ GLvoid drawScene()
 	{
 		glm::mat4 greenOrbitCircleModel = glm::mat4(1.0f);
 
+		// Apply offset
+		greenOrbitCircleModel = glm::translate(greenOrbitCircleModel, allSpheresOffset);
+
+		// Apply Z-axis rotation
+		greenOrbitCircleModel = glm::rotate(greenOrbitCircleModel, zAxisRotation, glm::vec3(0.0f, 0.0f, 1.0f));
+
 		// Rotate orbit plane around X-axis (same tilt as parent blue sphere)
 		greenOrbitCircleModel = glm::rotate(greenOrbitCircleModel, orbitPlaneTilts[i], glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -348,6 +383,10 @@ GLvoid drawScene()
 		float x = orbitRadius * cosf(orbitRotation);
 		float z = orbitRadius * sinf(orbitRotation);
 		greenOrbitCircleModel = glm::translate(greenOrbitCircleModel, glm::vec3(x, 0.0f, z));
+
+		// Scale green orbit circle based on current green orbit radius
+		float greenScale = greenOrbitRadius / initialGreenOrbitRadius;
+		greenOrbitCircleModel = glm::scale(greenOrbitCircleModel, glm::vec3(greenScale, greenScale, greenScale));
 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(greenOrbitCircleModel));
 		glDrawArrays(GL_LINE_LOOP, 0, greenCircleVertexCount);
@@ -358,6 +397,12 @@ GLvoid drawScene()
 	for (int i = 0; i < 3; i++)
 	{
 		glm::mat4 greenModel = glm::mat4(1.0f);
+
+		// Apply offset
+		greenModel = glm::translate(greenModel, allSpheresOffset);
+
+		// Apply Z-axis rotation
+		greenModel = glm::rotate(greenModel, zAxisRotation, glm::vec3(0.0f, 0.0f, 1.0f));
 
 		// Rotate orbit plane around X-axis (same tilt as parent blue sphere)
 		greenModel = glm::rotate(greenModel, orbitPlaneTilts[i], glm::vec3(1.0f, 0.0f, 0.0f));
@@ -404,6 +449,57 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		isSolid = !isSolid;
 		std::cout << (isSolid ? "Solid" : "Wireframe") << " mode" << std::endl;
 		break;
+	case 'w':
+	case 'W':
+		// Move all spheres up (Y+)
+		allSpheresOffset.y += moveSpeed;
+		break;
+	case 's':
+	case 'S':
+		// Move all spheres down (Y-)
+		allSpheresOffset.y -= moveSpeed;
+		break;
+	case 'a':
+	case 'A':
+		// Move all spheres left (X-)
+		allSpheresOffset.x -= moveSpeed;
+		break;
+	case 'd':
+	case 'D':
+		// Move all spheres right (X+)
+		allSpheresOffset.x += moveSpeed;
+		break;
+	case '+':
+	case '=':
+		// Move all spheres forward (Z-)
+		allSpheresOffset.z -= moveSpeed;
+		break;
+	case '-':
+	case '_':
+		// Move all spheres backward (Z+)
+		allSpheresOffset.z += moveSpeed;
+		break;
+	case 'y':
+	case 'Y':
+		// Increase all orbit radii
+		orbitRadius += radiusChangeSpeed;
+		greenOrbitRadius += radiusChangeSpeed * (initialGreenOrbitRadius / initialOrbitRadius);  // Keep proportion
+		std::cout << "Blue orbit radius: " << orbitRadius << ", Green orbit radius: " << greenOrbitRadius << std::endl;
+		break;
+	case 't':
+	case 'T':
+		// Decrease all orbit radii
+		orbitRadius -= radiusChangeSpeed;
+		if (orbitRadius < 0.5f) orbitRadius = 0.5f;  // Minimum radius
+		greenOrbitRadius = orbitRadius * (initialGreenOrbitRadius / initialOrbitRadius);  // Keep proportion
+		std::cout << "Blue orbit radius: " << orbitRadius << ", Green orbit radius: " << greenOrbitRadius << std::endl;
+		break;
+	case 'z':
+	case 'Z':
+		// Toggle Z-axis rotation
+		isZRotating = !isZRotating;
+		std::cout << "Z-axis rotation: " << (isZRotating ? "ON" : "OFF") << std::endl;
+		break;
 	case '1':
 
 		break;
@@ -435,9 +531,6 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 
 		break;
 	case 'c':
-
-		break;
-	case 't':
 
 		break;
 	case 'q':
@@ -530,6 +623,14 @@ GLvoid loop(int v)
 	greenOrbitRotation += greenOrbitSpeed;
 	if (greenOrbitRotation > 2 * glm::pi<float>()) {
 		greenOrbitRotation -= 2 * glm::pi<float>();
+	}
+
+	// Update Z-axis rotation if enabled
+	if (isZRotating) {
+		zAxisRotation += zRotationSpeed;
+		if (zAxisRotation > 2 * glm::pi<float>()) {
+			zAxisRotation -= 2 * glm::pi<float>();
+		}
 	}
 
 	glutPostRedisplay();
