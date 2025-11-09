@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chcp)",
+      "Bash(iconv:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
