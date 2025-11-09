@@ -140,7 +140,10 @@
     <ClCompile Include="CG1-17.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="CG1-19.cpp" />
+    <ClCompile Include="CG1-18.cpp" />
+    <ClCompile Include="CG1-19.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CG1-15.fs" />
@@ -152,9 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="basicCode.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="cone.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

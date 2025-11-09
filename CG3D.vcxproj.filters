@@ -30,6 +30,9 @@
     <ClCompile Include="CG1-19.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="CG1-18.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CG1-15.vs">
@@ -51,10 +54,5 @@
     <Text Include="basicCode.txt">
       <Filter>소스 파일</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="cone.obj">
-      <Filter>리소스 파일</Filter>
-    </Object>
   </ItemGroup>
 </Project>
