@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="cheat.h" />
     <ClInclude Include="loadShader.hpp" />
+    <ClInclude Include="OBJLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="basicCode.txt" />
