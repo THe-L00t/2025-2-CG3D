@@ -74,11 +74,18 @@ float pole1Rotation = 0.0f;
 float pole2Rotation = 0.0f;
 float rotationSpeed = 5.0f;
 
+// Animation control variables
+bool allAnimationsPaused = false;
+float cameraRevolutionAngle = 0.0f;
+bool cameraAutoRevolve = false;
+float cameraRevolutionSpeed = 1.0f; // degrees per frame
+
 // Swap animation variables
 bool isSwapping = false;
-float swapStartRotation = 0.0f;
-float swapTargetRotation = 0.0f;
-float swapAnimSpeed = 90.0f; // degrees per second
+float swapAnimTime = 0.0f;
+float swapAnimDuration = 2.0f; // seconds
+float upperBodyOffset1 = 0.0f; // offset for upper body 1 (starts at left)
+float upperBodyOffset2 = 0.0f; // offset for upper body 2 (starts at right)
 
 void main(int argc, char** argv)
 {
@@ -190,30 +197,70 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		break;
 	case 't':
 	case 'T':
-		// Rotate middle body around Y axis
-		middleBodyRotation += rotationSpeed;
+		// Rotate middle body around Y axis (with all upper parts)
+		if (!allAnimationsPaused) {
+			middleBodyRotation += rotationSpeed;
+			std::cout << "Middle body rotation: " << middleBodyRotation << " degrees" << std::endl;
+		}
 		break;
 	case 'l':
 	case 'L':
 		// Start swap animation if not already swapping
-		if (!isSwapping) {
+		if (!isSwapping && !allAnimationsPaused) {
 			isSwapping = true;
-			swapStartRotation = middleBodyRotation;
-			swapTargetRotation = middleBodyRotation + 180.0f;
-			std::cout << "Swapping upper bodies..." << std::endl;
+			swapAnimTime = 0.0f;
+			std::cout << "Swapping upper bodies positions..." << std::endl;
 		}
 		break;
 	case 'g':
 	case 'G':
 		// Rotate cannons in opposite directions around Y axis
-		cannon1Rotation += rotationSpeed;
-		cannon2Rotation -= rotationSpeed;
+		if (!allAnimationsPaused) {
+			cannon1Rotation += rotationSpeed;
+			cannon2Rotation -= rotationSpeed;
+			std::cout << "Cannon rotations: " << cannon1Rotation << ", " << cannon2Rotation << std::endl;
+		}
 		break;
 	case 'p':
 	case 'P':
 		// Rotate poles in opposite directions around X axis
-		pole1Rotation += rotationSpeed;
-		pole2Rotation -= rotationSpeed;
+		if (!allAnimationsPaused) {
+			pole1Rotation += rotationSpeed;
+			pole2Rotation -= rotationSpeed;
+			std::cout << "Pole rotations: " << pole1Rotation << ", " << pole2Rotation << std::endl;
+		}
+		break;
+	case 'o':
+	case 'O':
+		// Stop all animations
+		allAnimationsPaused = !allAnimationsPaused;
+		std::cout << "All animations: " << (allAnimationsPaused ? "PAUSED" : "RESUMED") << std::endl;
+		break;
+	case 'c':
+	case 'C':
+		// Reset to initial state
+		tankPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+		middleBodyRotation = 0.0f;
+		cannon1Rotation = 0.0f;
+		cannon2Rotation = 0.0f;
+		pole1Rotation = 0.0f;
+		pole2Rotation = 0.0f;
+		isSwapping = false;
+		swapAnimTime = 0.0f;
+		upperBodyOffset1 = 0.0f;
+		upperBodyOffset2 = 0.0f;
+		allAnimationsPaused = false;
+		cameraAutoRevolve = false;
+		cameraRevolutionAngle = 0.0f;
+		CameraConfig::pos = glm::vec3(5.f, 5.f, 5.f);
+		CameraConfig::dir = glm::vec3(0, 0, 0);
+		std::cout << "Reset to initial state" << std::endl;
+		break;
+	case 'a':
+	case 'A':
+		// Toggle camera auto-revolution around Y axis
+		cameraAutoRevolve = !cameraAutoRevolve;
+		std::cout << "Camera auto-revolution: " << (cameraAutoRevolve ? "ON" : "OFF") << std::endl;
 		break;
 	case 'q':
 		glutLeaveMainLoop();
@@ -224,23 +271,25 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 
 GLvoid SKeyboard(int key, int x, int y)
 {
-	switch (key) {
-	case GLUT_KEY_LEFT:
-		// Move tank left (negative X)
-		tankPosition.x -= tankMoveSpeed;
-		break;
-	case GLUT_KEY_RIGHT:
-		// Move tank right (positive X)
-		tankPosition.x += tankMoveSpeed;
-		break;
-	case GLUT_KEY_UP:
-		// Move tank forward (positive Z)
-		tankPosition.z += tankMoveSpeed;
-		break;
-	case GLUT_KEY_DOWN:
-		// Move tank backward (negative Z)
-		tankPosition.z -= tankMoveSpeed;
-		break;
+	if (!allAnimationsPaused) {
+		switch (key) {
+		case GLUT_KEY_LEFT:
+			// Move tank left (negative X)
+			tankPosition.x -= tankMoveSpeed;
+			break;
+		case GLUT_KEY_RIGHT:
+			// Move tank right (positive X)
+			tankPosition.x += tankMoveSpeed;
+			break;
+		case GLUT_KEY_UP:
+			// Move tank forward (positive Z)
+			tankPosition.z += tankMoveSpeed;
+			break;
+		case GLUT_KEY_DOWN:
+			// Move tank backward (negative Z)
+			tankPosition.z -= tankMoveSpeed;
+			break;
+		}
 	}
 	glutPostRedisplay();
 }
@@ -253,17 +302,41 @@ GLvoid loop(int v)
 {
 	gt.Update();
 
-	// Update swap animation
-	if (isSwapping) {
-		float step = swapAnimSpeed * gt.deltaTime;
-		if (middleBodyRotation < swapTargetRotation) {
-			middleBodyRotation += step;
-			if (middleBodyRotation >= swapTargetRotation) {
-				middleBodyRotation = swapTargetRotation;
-				isSwapping = false;
-				std::cout << "Swap complete" << std::endl;
-			}
+	// Update swap animation (only if not paused)
+	if (isSwapping && !allAnimationsPaused) {
+		swapAnimTime += gt.deltaTime;
+		float t = swapAnimTime / swapAnimDuration; // 0.0 ~ 1.0
+
+		if (t >= 1.0f) {
+			// Animation complete - swap positions permanently
+			t = 1.0f;
+			upperBodyOffset1 = 0.8f; // final position
+			upperBodyOffset2 = -0.8f; // final position
+			isSwapping = false;
+			std::cout << "Swap complete" << std::endl;
 		}
+		else {
+			// Upper body 1 moves from left (-0.4) to right (+0.4)
+			// Upper body 2 moves from right (+0.4) to left (-0.4)
+			// Total distance: 0.8
+			upperBodyOffset1 = 0.8f * t; // moves right: 0.0 -> 0.8
+			upperBodyOffset2 = -0.8f * t; // moves left: 0.0 -> -0.8
+		}
+	}
+
+	// Update camera auto-revolution (also paused by 'o')
+	if (cameraAutoRevolve && !allAnimationsPaused) {
+		cameraRevolutionAngle += cameraRevolutionSpeed;
+		if (cameraRevolutionAngle >= 360.0f) {
+			cameraRevolutionAngle -= 360.0f;
+		}
+
+		// Revolve camera around origin (CameraConfig::dir)
+		glm::vec3 center = CameraConfig::dir;
+		glm::vec3 initialRelative = glm::vec3(5.f, 5.f, 5.f) - center;
+		glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(cameraRevolutionAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec4 newRelative = rotation * glm::vec4(initialRelative, 1.0f);
+		CameraConfig::pos = center + glm::vec3(newRelative);
 	}
 
 	glutPostRedisplay();
@@ -494,16 +567,15 @@ void drawTank()
 	glm::vec4 poleColor(1.0f, 1.0f, 0.0f, 1.0f);
 
 	// 3. Upper body 1 - Dark cyan
-	// Upper bodies revolve with middle body but do not rotate themselves
+	// Upper bodies rotate with middle body
 	glm::mat4 upper1Transform = middleTransform;
 	upper1Transform = glm::translate(upper1Transform, glm::vec3(0.0f, 0.8f, 0.0f));
-	glm::vec3 upper1Pos(leftX, 0.3f, 0.0f);
+	glm::vec3 upper1Pos(leftX + upperBodyOffset1, 0.3f, 0.0f); // Apply swap offset
 
 	glm::mat4 upper1Base = upper1Transform;
 	upper1Base = glm::translate(upper1Base, upper1Pos);
-	// Counter-rotate to prevent self-rotation
-	upper1Base = glm::rotate(upper1Base, glm::radians(-middleBodyRotation), glm::vec3(0.0f, 1.0f, 0.0f));
-	drawCube(upper1Transform, upper1Pos, glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(0.0f, -middleBodyRotation, 0.0f), upperColor);
+	// Now rotating with middle body (no counter-rotation)
+	drawCube(upper1Transform, upper1Pos, glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(0.0f, 0.0f, 0.0f), upperColor);
 
 	// Upper body 1 - Cannon - Black (with rotation around Y axis)
 	glm::mat4 cannon1Transform = upper1Base;
@@ -518,13 +590,12 @@ void drawTank()
 	drawCube(pole1Transform, glm::vec3(0.0f, 0.4f, 0.0f), glm::vec3(0.1f, 0.8f, 0.1f), glm::vec3(0.0f), poleColor); // Draw pole above pivot
 
 	// 4. Upper body 2 - Dark cyan
-	glm::vec3 upper2Pos(rightX, 0.3f, 0.0f);
+	glm::vec3 upper2Pos(rightX + upperBodyOffset2, 0.3f, 0.0f); // Apply swap offset
 
 	glm::mat4 upper2Base = upper1Transform;
 	upper2Base = glm::translate(upper2Base, upper2Pos);
-	// Counter-rotate to prevent self-rotation
-	upper2Base = glm::rotate(upper2Base, glm::radians(-middleBodyRotation), glm::vec3(0.0f, 1.0f, 0.0f));
-	drawCube(upper1Transform, upper2Pos, glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(0.0f, -middleBodyRotation, 0.0f), upperColor);
+	// Now rotating with middle body (no counter-rotation)
+	drawCube(upper1Transform, upper2Pos, glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(0.0f, 0.0f, 0.0f), upperColor);
 
 	// Upper body 2 - Cannon - Black (with rotation around Y axis)
 	glm::mat4 cannon2Transform = upper2Base;
