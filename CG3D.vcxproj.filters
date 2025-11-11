@@ -33,6 +33,12 @@
     <ClCompile Include="CG1-18.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="CG1-20.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="CG1-21.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CG1-15.vs">
@@ -47,6 +53,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="cheat.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="OBJLoader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
