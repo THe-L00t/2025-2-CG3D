@@ -146,18 +146,18 @@ void main(int argc, char** argv)
 	createCone();
 	createCube();
 
-	std::cout << "x/X : 객체의 x축에 대하여 각각 양/음 방향으로 회전하기(자전)" << std::endl;
-	std::cout << "y/Y: 객체의 y축에 대하여 각각 양/음 방향으로 회전하기 (자전)" << std::endl;
-	std::cout << "r/R: 중앙의 y축에 대하여 양/음 방향으로 회전하기 (공전)" << std::endl;
-	std::cout << "a/A: 도형이 제자리에서 확대/축소" << std::endl;
-	std::cout << "b/B: 도형이 원점에 대해서 확대/축소 (위치도 바뀐다.)" << std::endl;
-	std::cout << "d/D: 도형이 x축에서 좌/우로 이동" << std::endl;
-	std::cout << "e/E: 도형이 y축에서 위/아래로 이동" << std::endl;
-	std::cout << "t: 두 도형이 원점을 통과하며 상대방의 자리로 이동하는 애니메이션" << std::endl;
-	std::cout << "u: 두 도형이 한 개는 위로, 다른 도형은 아래로 이동하면서 상대방의 자리로 이동하는 애니메이션" << std::endl;
-	std::cout << "v: 키보드 5: 두 도형이 한 개는 확대, 다른 한 개는 축소되며 자전과 공전하기" << std::endl;
-	std::cout << "c: 두 도형을 다른 도형으로 바꾼다" << std::endl;
-	std::cout << "s: 초기화 하기" << std::endl <<std::endl;
+	//std::cout << "x/X : 객체의 x축에 대하여 각각 양/음 방향으로 회전하기(자전)" << std::endl;
+	//std::cout << "y/Y: 객체의 y축에 대하여 각각 양/음 방향으로 회전하기 (자전)" << std::endl;
+	//std::cout << "r/R: 중앙의 y축에 대하여 양/음 방향으로 회전하기 (공전)" << std::endl;
+	//std::cout << "a/A: 도형이 제자리에서 확대/축소" << std::endl;
+	//std::cout << "b/B: 도형이 원점에 대해서 확대/축소 (위치도 바뀐다.)" << std::endl;
+	//std::cout << "d/D: 도형이 x축에서 좌/우로 이동" << std::endl;
+	//std::cout << "e/E: 도형이 y축에서 위/아래로 이동" << std::endl;
+	//std::cout << "t: 두 도형이 원점을 통과하며 상대방의 자리로 이동하는 애니메이션" << std::endl;
+	//std::cout << "u: 두 도형이 한 개는 위로, 다른 도형은 아래로 이동하면서 상대방의 자리로 이동하는 애니메이션" << std::endl;
+	//std::cout << "v: 키보드 5: 두 도형이 한 개는 확대, 다른 한 개는 축소되며 자전과 공전하기" << std::endl;
+	//std::cout << "c: 두 도형을 다른 도형으로 바꾼다" << std::endl;
+	//std::cout << "s: 초기화 하기" << std::endl <<std::endl;
 
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(Reshape);
